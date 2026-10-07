@@ -1,7 +1,7 @@
 @font-face{font-family:Mulish;src:url('assets/mulish-regular.ttf')}
 @font-face{font-family:Mulish;src:url('assets/mulish-semibold.ttf');font-weight:600}
 @font-face{font-family:Mulish;src:url('assets/mulish-bold.ttf');font-weight:700}
-:root{color-scheme:only light;font-family:Mulish,system-ui,sans-serif;font-synthesis:none;color:#222428;background:#fff;--muted:#676b70;--line:#e1e3e6;--selected:#24262a}html{scroll-padding-bottom:150px}
+:root{color-scheme:only light;font-family:Mulish,system-ui,sans-serif;font-synthesis:none;color:#222428;background:#fff;--muted:#676b70;--line:#e1e3e6;--selected:#24262a}html{scroll-padding-bottom:180px}
 *{box-sizing:border-box}body{margin:0}button,textarea,input{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{cursor:default}button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #4276bd;outline-offset:4px}[hidden]{display:none!important}
 .survey-header{width:100%;margin:0;padding:0;line-height:0;background:linear-gradient(90deg,#f5821f 0%,#c5281c 100%)}
 .survey-header-banner{display:block;width:100%;height:auto;max-height:72px;object-fit:cover;object-position:center}
@@ -35,8 +35,8 @@ h1{font-size:28px;font-weight:600;line-height:1.35;letter-spacing:-.6px;margin:0
 .prompt-figure{margin:0 0 16px;display:flex;justify-content:center}
 .prompt-figure img{width:min(100%,220px);height:auto;border-radius:16px;border:1px solid var(--line);background:#fff;box-shadow:0 8px 24px rgba(32,33,36,.08)}
 .concept-prompt{margin-top:0}
-.concept-figure{margin:0 0 8px;display:flex;flex-direction:column;align-items:stretch;width:100%}
-.concept-figure img{width:100%;max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.concept-figure{margin:0 0 8px;display:flex;flex-direction:column;align-items:center;width:100%}
+.concept-figure img{display:block;width:100%;max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.05);scroll-margin-bottom:160px}
 .concept-figure figcaption{margin:12px 0 0;text-align:center;font-size:16px;font-weight:700;line-height:1.4}
 .concept-tooltip{position:relative;margin-top:12px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(32,33,36,.12);text-align:center;font-size:14px;line-height:1.45}
 .concept-tooltip::before{content:"";position:absolute;top:-6px;left:50%;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
@@ -65,11 +65,21 @@ textarea{width:100%;min-height:88px;padding:12px;border:1px solid #d6d8da;border
   .back:hover{color:#202124}
 }
 @media(max-width:600px){
-  main{padding:0 20px;margin-top:16px}
-  .progress-row{margin-bottom:24px}
+  main{padding:0 20px;margin:16px auto 180px}
+  .progress-row{margin-bottom:16px}
   h1{font-size:23px;letter-spacing:-.4px}
-  .concept-figure img{width:100%}
+  .instruction{margin-bottom:12px}
+  .concept-figure{margin:0 0 12px}
+  /* Fit the whole phone mockup above the fixed dock (svh = mobile browser chrome expanded). */
+  .concept-figure img{
+    width:auto;
+    max-width:min(100%, 320px);
+    max-height:min(52svh, calc(100svh - 280px));
+    height:auto;
+    object-fit:contain;
+  }
   .action-inner{padding:12px 20px}
+  .next-hint{padding:8px 20px 0}
 }
 @media(prefers-reduced-motion:no-preference){
   .progress>div{transition:width .15s ease}
