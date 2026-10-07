@@ -1,0 +1,9 @@
+{
+  "name": "imobile-upi-scan-pay-survey",
+  "private": true,
+  "scripts": {
+    "test": "node generate_code_gs.js && node --test tests/*.test.cjs",
+    "generate": "node generate_code_gs.js",
+    "preview": "python3 -m http.server 8893 --directory dist"
+  }
+}
