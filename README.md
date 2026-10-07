@@ -4,7 +4,7 @@ Base recreation of the Google Form **Understanding iMobile UPI Scan & Pay behavi
 
 Source form: [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSe8PZaq5_1kKoAVxP-CTS4s-cq_x0vjWhveOEMpf6jL5HdaaQ/viewform)
 
-**Host:** GitHub Pages — publish `dist/` via `.github/workflows/pages.yml` (same pattern as the illustration survey). Expected public URL after first deploy: `https://paneerpakoda.github.io/imobile-upi-scan-pay-survey/`
+[Public survey](https://paneerpakoda.github.io/imobile-upi-scan-pay-survey/) · Repo: [paneerpakoda/imobile-upi-scan-pay-survey](https://github.com/paneerpakoda/imobile-upi-scan-pay-survey)
 
 **Responses:** Private Google Sheet + Apps Script web app (see **SETUP.md**). Endpoint goes in `dist/config.js` only; never commit Sheet contents.
 
