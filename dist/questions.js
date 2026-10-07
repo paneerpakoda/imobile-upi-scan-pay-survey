@@ -1,78 +1,118 @@
-/* Display copy and step structure for the iMobile UPI Scan & Pay survey.
-   Content mirrored from the source Google Form; iterate later without changing architecture. */
+/* Display copy and step structure. Branching lives in rules.js. */
 window.SURVEY_CONTENT = Object.freeze({
-  title: 'Understanding iMobile UPI Scan & Pay behaviour',
-  shortTitle: 'UPI Scan & Pay feedback',
-  description: 'Help us improve your UPI payment experience! We’d like to understand how you currently make UPI QR payments on iMobile and your awareness and expectations around non-logged-in Scan & Pay. We’ll also show you a few concepts and get your feedback on them.',
-  duration: 'This survey will take approximately 3–5 minutes.',
-  conceptSection: {
-    title: 'Concept feedback',
-    description: 'We’d like to get your feedback on a few concepts designed to make Scan & Pay easier to discover and use.'
-  },
+  title: 'How you pay with UPI on iMobile',
+  shortTitle: 'UPI payments feedback',
+  description: 'We’ll ask how you pay with UPI today, then show you two screens from iMobile.',
+  duration: 'This survey will take approximately 5 minutes.',
+  commentPrompt: 'What should change?',
+  conceptPrompts: Object.freeze({
+    notice: 'Does this make Scan any QR on the login screen, before the PIN, easier to notice?',
+    try: 'How likely would you be to try Scan any QR on the login screen, before the PIN?',
+    open: 'How likely would you be to open iMobile and try Scan any QR on the login screen, before the PIN?'
+  }),
   labels: Object.freeze({
     upi_app: Object.freeze({
       imobile: 'iMobile',
-      google_pay: 'Google pay',
+      google_pay: 'Google Pay',
       phonepe: 'PhonePe',
       paytm: 'Paytm',
-      bhim: 'BHIM (Bharat Interface for Money',
+      whatsapp: 'WhatsApp Pay',
+      cred: 'CRED',
+      amazon_pay: 'Amazon Pay',
+      super_money: 'super.money',
+      bhim: 'BHIM',
       other: 'Other'
     }),
-    qr_path: Object.freeze({
-      unlock_upi_scan: 'Unlock iMobile → UPI Payments → Scan QR',
-      unlock_send_money_upi_scan: 'Unlock iMobile → Send Money → UPI Payments → Scan QR',
-      landing_scan_any_qr: 'Use Scan Any QR directly from the landing screen',
-      dont_use_imobile_qr: 'I don’t use iMobile for QR payments'
+    opens_imobile: Object.freeze({
+      yes: 'Yes, I open it',
+      rarely: 'I have it, but I almost never open it',
+      no: 'I don’t have it'
     }),
-    unlock_feel: Object.freeze({
-      already_use_convenient: 'I already use it and find it very convenient',
-      know_would_like: 'I know about it and would like to use it',
-      know_prefer_login: 'I know about it, but I prefer logging in',
-      didnt_know_would_try: 'I didn’t know about it, but I would like to try it',
-      didnt_know_no_need: 'I didn’t know about it and don’t see a need for it'
-    }),
-    unlock_reason: Object.freeze({
-      usual_habit: 'It’s how I usually make a UPI payment',
-      comfortable_after_login: 'I’m more comfortable making payments after logging in',
-      check_balance: 'I want to check my account/balance before paying',
-      feels_more_secure: 'I feel it is more secure to log in first',
-      unaware_of_no_login: 'I’m not aware that I can scan and pay without logging in',
+    nonuser_reason: Object.freeze({
+      separate_app: 'I have to open a separate bank app',
+      login: 'I have to log in',
+      trust: 'I trust my UPI app more for payments',
+      bad_experience: 'I had a bad payment experience on iMobile',
+      rewards: 'Rewards or offers are better in my usual app',
+      upi_id: 'My UPI ID is already set up in my usual app',
+      habit: 'No strong reason. I’m used to my app',
       other: 'Other'
     }),
-    importance: Object.freeze({
-      least: 'Least Important',
-      moderate: 'Moderately Important',
-      most: 'Most Important'
+    scan_method: Object.freeze({
+      login_screen: 'Scan any QR on the login screen, before the PIN',
+      log_in_then_scan: 'Log in, then scan',
+      widget: 'The home-screen widget',
+      dont_scan: 'I open iMobile, but I don’t scan QR there'
+    }),
+    found_scan: Object.freeze({
+      noticed: 'I noticed it myself',
+      someone: 'Someone I know showed me',
+      bank_message: 'A message from the bank',
+      dont_remember: 'I don’t remember',
+      other: 'Other'
+    }),
+    almost_stopped: Object.freeze({
+      slow_launch: 'It is slow to open',
+      safety: 'I wasn’t sure it was safe',
+      confirmation: 'I didn’t trust that the payment had gone through',
+      failed: 'It failed or got stuck',
+      nothing: 'Nothing gets in the way'
     }),
     likert: Object.freeze({
       very_unlikely: 'Very unlikely',
       unlikely: 'Unlikely',
       neutral: 'Neutral',
       likely: 'Likely',
-      very_likely: 'Very likely'
+      very_likely: 'Very likely',
+      already_do: 'I already do this'
+    }),
+    notice: Object.freeze({
+      clearer: 'Clearer',
+      same: 'About the same',
+      more_confusing: 'More confusing'
+    }),
+    knew_scan: Object.freeze({
+      yes: 'Yes',
+      no: 'No',
+      not_sure: 'Not sure'
+    }),
+    persuade_reason: Object.freeze({
+      balance: 'I want to see my balance before I pay',
+      trust: 'I don’t trust a payment before I log in',
+      failed: 'I tried Scan any QR on the login screen, before the PIN, and it didn’t work',
+      no_harder: 'Logging in does not bother me',
+      other: 'Other'
+    }),
+    knew_widget: Object.freeze({
+      yes: 'Yes',
+      no: 'No',
+      not_sure: 'Not sure'
     })
   }),
-  importanceRows: Object.freeze([
-    Object.freeze({ key: 'importance_speed', label: 'Speed & fewer steps' }),
-    Object.freeze({ key: 'importance_ease', label: 'Ease & familiarity' }),
-    Object.freeze({ key: 'importance_security', label: 'Security' }),
-    Object.freeze({ key: 'importance_confirmation', label: 'Payment confirmation' }),
-    Object.freeze({ key: 'importance_no_login', label: 'No login required' })
-  ]),
+  upiAppLogos: Object.freeze({
+    imobile: 'assets/upi-apps/imobile-app.png',
+    google_pay: 'assets/upi-apps/google-pay.png',
+    phonepe: 'assets/upi-apps/phonepe.png',
+    paytm: 'assets/upi-apps/paytm.png',
+    whatsapp: 'assets/upi-apps/whatsapp.png',
+    cred: 'assets/upi-apps/cred.png',
+    amazon_pay: 'assets/upi-apps/amazon-pay.png',
+    super_money: 'assets/upi-apps/super-money.png',
+    bhim: 'assets/upi-apps/bhim.png',
+    other: 'assets/upi-apps/other.svg'
+  }),
   concepts: Object.freeze([
     Object.freeze({
       id: 'concept_1',
-      title: 'Concept 1',
-      description: 'A first-time onboarding screen introducing Scan & Pay on the UPI landing page and for the first time users, highlighting that users can pay without logging in.',
-      image: 'assets/concept-1.jpg',
+      title: 'First screen',
+      image: 'assets/concept-1.png',
       likelihoodKey: 'concept_1_likelihood',
       feedbackKey: 'concept_1_feedback'
     }),
     Object.freeze({
       id: 'concept_2',
-      title: 'Concept 2',
-      description: 'A highlighted “Scan any QR” card with a tooltip for users who haven’t used the feature, making it easier to discover and understand.',
-      image: 'assets/concept-2.jpg',
+      title: 'Second screen',
+      image: 'assets/concept-2.png',
       likelihoodKey: 'concept_2_likelihood',
       feedbackKey: 'concept_2_feedback'
     })
@@ -85,39 +125,76 @@ window.SURVEY_CONTENT = Object.freeze({
       field: 'upi_app',
       otherField: 'upi_app_other',
       required: true,
-      question: 'What app do you use for your UPI payments?',
-      optionsKey: 'upi_app'
+      question: 'What app do you usually use for UPI payments?',
+      optionsKey: 'upi_app',
+      withLogos: true
     }),
     Object.freeze({
-      id: 'qr_path',
+      id: 'opens_imobile',
       kind: 'choice',
-      field: 'qr_path',
+      field: 'opens_imobile',
       required: true,
-      question: 'When you make a QR payment through iMobile, what do you usually do?',
-      optionsKey: 'qr_path'
+      question: 'In a typical month, do you open the iMobile app?',
+      optionsKey: 'opens_imobile'
     }),
     Object.freeze({
-      id: 'unlock_feel',
+      id: 'nonuser_reason',
       kind: 'choice',
-      field: 'unlock_feel',
-      required: false,
-      question: 'How do you feel about being able to make a UPI payment by scanning a QR code on iMobile without unlocking the app?',
-      optionsKey: 'unlock_feel'
-    }),
-    Object.freeze({
-      id: 'unlock_reason',
-      kind: 'choice',
-      field: 'unlock_reason',
-      otherField: 'unlock_reason_other',
+      field: 'nonuser_reason',
+      otherField: 'nonuser_reason_other',
       required: true,
-      question: 'If you unlock iMobile before making a QR payment, what is the main reason?',
-      optionsKey: 'unlock_reason'
+      question: 'What’s the main reason you pay in another app instead of iMobile?',
+      optionsKey: 'nonuser_reason'
     }),
     Object.freeze({
-      id: 'importance',
-      kind: 'matrix',
-      required: false,
-      question: 'How important are the following factors to you when making a QR payment?'
+      id: 'scan_method',
+      kind: 'choice',
+      field: 'scan_method',
+      required: true,
+      question: 'When you pay a QR from iMobile, what do you usually do?',
+      optionsKey: 'scan_method'
+    }),
+    Object.freeze({
+      id: 'found_scan',
+      kind: 'choice',
+      field: 'found_scan',
+      otherField: 'found_scan_other',
+      required: true,
+      question: 'How did you find Scan any QR on the login screen, before the PIN?',
+      optionsKey: 'found_scan'
+    }),
+    Object.freeze({
+      id: 'almost_stopped',
+      kind: 'choice',
+      field: 'almost_stopped',
+      required: true,
+      question: 'When you use Scan any QR on the login screen, before the PIN, what gets in the way?',
+      optionsKey: 'almost_stopped'
+    }),
+    Object.freeze({
+      id: 'knew_scan',
+      kind: 'choice',
+      field: 'knew_scan',
+      required: true,
+      question: 'Did you know about Scan any QR on the login screen, before the PIN?',
+      optionsKey: 'knew_scan'
+    }),
+    Object.freeze({
+      id: 'persuade_reason',
+      kind: 'choice',
+      field: 'persuade_reason',
+      otherField: 'persuade_reason_other',
+      required: true,
+      question: 'What’s the main reason you don’t use Scan any QR on the login screen, before the PIN?',
+      optionsKey: 'persuade_reason'
+    }),
+    Object.freeze({
+      id: 'knew_widget',
+      kind: 'choice',
+      field: 'knew_widget',
+      required: true,
+      question: 'Did you know iMobile has a home-screen widget that opens Scan any QR?',
+      optionsKey: 'knew_widget'
     }),
     Object.freeze({ id: 'concept_1', kind: 'concept', conceptId: 'concept_1', required: true }),
     Object.freeze({ id: 'concept_2', kind: 'concept', conceptId: 'concept_2', required: true })

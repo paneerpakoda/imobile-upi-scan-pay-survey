@@ -17,7 +17,7 @@ npm run preview
 
 Open http://127.0.0.1:8893/
 
-Without a collector endpoint in `dist/config.js`, you can walk every step; final send stays disabled until setup is complete.
+Without a collector endpoint in `dist/config.js`, you can walk every step and tap **Finish preview** on the last screen. Answers are not saved until a collector is connected (SETUP.md).
 
 ## Architecture (mirrors illustration survey)
 
@@ -50,4 +50,4 @@ Do not publish Sheet contents or credentials.
 
 ## Question content
 
-See **SURVEY.md** for the mirrored question set and required flags. Iterate questions in Design Mode / `dist/questions.js`.
+See **SURVEY.md** for the approved flow. Question copy is in `dist/questions.js`.

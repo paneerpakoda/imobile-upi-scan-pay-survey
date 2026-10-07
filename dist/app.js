@@ -17,7 +17,11 @@ try {
       R.validate(saved.pendingResponse);
       state = { ...saved.pendingResponse, pendingResponse: saved.pendingResponse, step: C.steps.length - 1 };
     } else if (saved.submitted === true) state.submitted = true;
-    else if (saved.answers) state = { ...state, ...saved, answers: { ...blankAnswers(), ...saved.answers } };
+    else if (saved.answers) {
+      const known = blankAnswers();
+      for (const key of Object.keys(known)) if (typeof saved.answers[key] === 'string') known[key] = saved.answers[key];
+      state = { ...state, ...saved, answers: known };
+    }
   }
 } catch {}
 
@@ -48,13 +52,43 @@ function conceptFor(stepDef) {
 function stepReady() {
   return R.stepComplete(currentStep().id, answers);
 }
+function visibleSteps() {
+  return C.steps.filter(s => R.stepVisible(s.id, answers));
+}
+function visibleIndex() {
+  return visibleSteps().findIndex(s => s.id === currentStep().id);
+}
+function findVisibleStep(from, direction) {
+  let i = from + direction;
+  while (i >= 0 && i < C.steps.length) {
+    if (R.stepVisible(C.steps[i].id, answers)) return i;
+    i += direction;
+  }
+  return from;
+}
+function syncBranchAnswers() {
+  R.clearHiddenAnswers(answers);
+}
+function progressMeta() {
+  const visible = visibleSteps();
+  const index = Math.max(0, visible.findIndex(s => s.id === currentStep().id));
+  return { current: index + 1, total: R.maxVisibleCount(answers) };
+}
 
 function choiceOptions(stepDef) {
   const labels = C.labels[stepDef.optionsKey];
   const keys = Object.keys(labels);
-  return `<div class="choice-options" role="radiogroup" aria-label="${escape(stepDef.question)}">${keys.map(value => {
+  const withLogos = stepDef.withLogos === true;
+  const figure = stepDef.image
+    ? `<figure class="prompt-figure"><img src="${escape(stepDef.image)}" alt="${escape(stepDef.imageAlt || '')}" width="360" height="800"></figure>`
+    : '';
+  return `${figure}<div class="choice-options" role="radiogroup" aria-label="${escape(stepDef.question)}">${keys.map(value => {
     const selected = answers[stepDef.field] === value;
-    return `<button type="button" class="choice-option" data-field="${stepDef.field}" data-choice="${value}" aria-pressed="${selected}">${escape(labels[value])}</button>`;
+    const logo = withLogos ? C.upiAppLogos[value] : '';
+    const mark = logo
+      ? `<span class="choice-logo" aria-hidden="true"><img src="${escape(logo)}" alt="" width="28" height="28"></span>`
+      : '';
+    return `<button type="button" class="choice-option${withLogos ? ' has-logo' : ''}" data-field="${stepDef.field}" data-choice="${value}" aria-pressed="${selected}">${mark}<span class="choice-label">${escape(labels[value])}</span></button>`;
   }).join('')}</div>` + (stepDef.otherField ? otherField(stepDef) : '');
 }
 
@@ -63,33 +97,25 @@ function otherField(stepDef) {
   return `<div class="other-text" ${show ? '' : 'hidden'}><label for="${stepDef.otherField}">Please specify</label><input id="${stepDef.otherField}" name="${stepDef.otherField}" type="text" maxlength="200" value="${escape(answers[stepDef.otherField])}" placeholder="Your answer" autocomplete="off"></div>`;
 }
 
-function matrixBlock() {
-  const cols = Object.entries(C.labels.importance);
-  return `<div class="matrix" role="group" aria-label="${escape(currentStep().question)}">
-    <div class="matrix-head" aria-hidden="true"><span></span>${cols.map(([, label]) => `<span>${escape(label)}</span>`).join('')}</div>
-    ${C.importanceRows.map(row => `<div class="matrix-row" role="radiogroup" aria-label="${escape(row.label)}">
-      <span class="matrix-row-label">${escape(row.label)}</span>
-      ${cols.map(([value, label]) => `<button type="button" class="matrix-cell" data-field="${row.key}" data-choice="${value}" aria-pressed="${answers[row.key] === value}" aria-label="${escape(label)}, ${escape(row.label)}"></button>`).join('')}
-    </div>`).join('')}
-  </div>
-  <p class="instruction optional-note">Optional — you can skip any or all factors.</p>`;
+function optionButtons(field, legend, labels) {
+  return `<div class="choice-options" role="radiogroup" aria-label="${escape(legend)}">${Object.entries(labels).map(([value, label]) =>
+    `<button type="button" class="choice-option" data-field="${field}" data-choice="${value}" aria-pressed="${answers[field] === value}">${escape(label)}</button>`
+  ).join('')}</div>`;
 }
 
 function conceptBlock(stepDef) {
   const concept = conceptFor(stepDef);
-  const likelihood = answers[concept.likelihoodKey];
-  return `<div class="concept-card">
-    <p class="concept-kicker">${escape(C.conceptSection.title)}</p>
-    <h2 class="concept-title">${escape(concept.title)}</h2>
-    <p class="instruction">${escape(concept.description)}</p>
-    <figure class="concept-figure"><img src="${concept.image}" alt="${escape(concept.title)} concept preview" width="360" height="800"></figure>
-  </div>
-  <p class="subquestion">How likely would you be to use Scan &amp; Pay after seeing this? <span class="required" aria-hidden="true">*</span></p>
-  <div class="choice-options" role="radiogroup" aria-label="How likely would you be to use Scan & Pay after seeing this?">${Object.entries(C.labels.likert).map(([value, label]) =>
-    `<button type="button" class="choice-option" data-field="${concept.likelihoodKey}" data-choice="${value}" aria-pressed="${likelihood === value}">${escape(label)}</button>`
-  ).join('')}</div>
+  const segment = R.conceptSegment(answers);
+  const prompt = C.conceptPrompts[segment];
+  const scale = segment === 'notice' ? C.labels.notice : C.labels.likert;
+  const caption = concept.caption ? `<figcaption>${escape(concept.caption)}</figcaption>` : '';
+  const tooltip = concept.tooltip ? `<p class="concept-tooltip">${escape(concept.tooltip)}</p>` : '';
+  return `<p class="instruction">Look at this screen, then answer below.</p>
+  <figure class="concept-figure"><img src="${concept.image}" alt="">${tooltip}${caption}</figure>
+  <p class="subquestion concept-prompt">${escape(prompt)}</p>
+  ${optionButtons(concept.likelihoodKey, prompt, scale)}
   <div class="comment-field">
-    <label for="${concept.feedbackKey}">What do you like about this concept, and what would you improve? <span>(optional)</span></label>
+    <label for="${concept.feedbackKey}">${escape(C.commentPrompt)} <span>(optional)</span></label>
     <textarea id="${concept.feedbackKey}" name="${concept.feedbackKey}" maxlength="1500" rows="3" placeholder="Your answer">${escape(answers[concept.feedbackKey])}</textarea>
   </div>`;
 }
@@ -99,42 +125,39 @@ function introBlock() {
     <div class="intro-card-header"><strong>About this survey</strong></div>
     <p class="intro-card-desc">${escape(C.description)}</p>
     <p class="intro-card-footer">${escape(C.duration)}</p>
-  </div>
-  <div class="survey-intro-card concept-preview-note">
-    <div class="intro-card-header"><strong>${escape(C.conceptSection.title)}</strong></div>
-    <p class="intro-card-desc">${escape(C.conceptSection.description)}</p>
   </div>`;
 }
 
 function render(focus = false) {
   $('#form-error').hidden = true;
   if (state.submitted) { showSuccess(); return; }
+  syncBranchAnswers();
+  if (!R.stepVisible(currentStep().id, answers)) {
+    step = findVisibleStep(step, step > 0 ? -1 : 1);
+  }
   const q = currentStep();
-  const final = step === C.steps.length - 1;
-  const kind = q.kind === 'intro' ? 'iMobile research'
-    : q.kind === 'concept' ? C.conceptSection.title
-    : q.kind === 'matrix' ? 'Payment priorities'
-    : 'Current behaviour';
+  const visible = visibleSteps();
+  const final = visible[visible.length - 1]?.id === q.id;
+  const progress = progressMeta();
   const title = q.kind === 'intro' ? C.title
     : q.kind === 'concept' ? conceptFor(q).title
     : q.question;
-  const requiredMark = q.required ? ' <span class="required" aria-hidden="true">*</span>' : '';
   const body = q.kind === 'intro' ? introBlock()
     : q.kind === 'choice' ? choiceOptions(q)
-    : q.kind === 'matrix' ? matrixBlock()
     : conceptBlock(q);
 
-  $('#screen').innerHTML = `<p class="question-kind">${kind}</p>
-    <div class="question-heading"><h1 tabindex="-1">${q.kind === 'choice' || q.kind === 'matrix' ? escape(title) + requiredMark : escape(title)}</h1></div>
-    ${q.kind === 'concept' ? '' : q.kind === 'intro' ? '' : ''}
+  $('#screen').innerHTML = `<div class="question-heading"><h1 tabindex="-1">${escape(title)}</h1></div>
     ${body}`;
 
-  $('#step-label').textContent = `${step + 1} / ${C.steps.length}`;
-  $('#progress-fill').style.width = `${(step + 1) / C.steps.length * 100}%`;
-  $('#back').hidden = step === 0;
-  updateNext(!stepReady() || (final && !connected), final
-    ? (state.pendingResponse ? 'Try sending again' : 'Send feedback')
-    : (step === 0 ? 'Start survey →' : 'Next →'));
+  $('#step-label').textContent = `${progress.current} / ${progress.total}`;
+  $('#progress-fill').style.width = `${progress.current / progress.total * 100}%`;
+  $('#back').hidden = progress.current <= 1;
+  updateNext(!stepReady(), final
+    ? (connected
+      ? (state.pendingResponse ? 'Try sending again' : 'Send feedback')
+      : 'Finish preview')
+    : (q.kind === 'intro' ? 'Start survey →' : 'Next →'));
+  updateHint();
   $('#back').disabled = !!state.pendingResponse;
   if (state.pendingResponse) document.querySelectorAll('[data-choice],textarea,input').forEach(el => el.disabled = true);
   if (focus) {
@@ -143,20 +166,36 @@ function render(focus = false) {
   }
 }
 
+function updateHint() {
+  const hint = $('#next-hint');
+  if (!hint) return;
+  hint.textContent = 'Choose an answer to continue.';
+  hint.hidden = stepReady();
+}
+
+function isFinalVisibleStep() {
+  const visible = visibleSteps();
+  return visible[visible.length - 1]?.id === currentStep().id;
+}
+
 $('#survey').addEventListener('click', event => {
   const button = event.target.closest('[data-choice]');
   if (!button || button.disabled || busy || state.pendingResponse) return;
   const field = button.dataset.field;
   const value = button.dataset.choice;
-  if (!R.validAnswer(field, value) && value !== '') return;
+  if (!R.validAnswer(field, value, answers) && value !== '') return;
   answers[field] = value;
   if (field === 'upi_app' && value !== 'other') answers.upi_app_other = '';
-  if (field === 'unlock_reason' && value !== 'other') answers.unlock_reason_other = '';
+  if (field === 'nonuser_reason' && value !== 'other') answers.nonuser_reason_other = '';
+  if (field === 'found_scan' && value !== 'other') answers.found_scan_other = '';
+  if (field === 'persuade_reason' && value !== 'other') answers.persuade_reason_other = '';
+  if (field === 'upi_app' || field === 'opens_imobile' || field === 'scan_method' || field === 'knew_scan') syncBranchAnswers();
   document.querySelectorAll(`[data-field="${field}"][data-choice]`).forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.choice === answers[field])));
   const otherWrap = $('.other-text');
   if (otherWrap) otherWrap.hidden = answers[currentStep().field] !== 'other';
-  updateNext(!stepReady() || (step === C.steps.length - 1 && !connected));
+  updateNext(!stepReady());
+  updateHint();
   $('#form-error').hidden = true;
   persist();
 });
@@ -165,31 +204,37 @@ $('#survey').addEventListener('input', event => {
   if (busy || state.pendingResponse) return;
   const el = event.target;
   if (!el.name || !Object.prototype.hasOwnProperty.call(R.fields, el.name)) return;
-  answers[el.name] = el.value;
-  updateNext(!stepReady() || (step === C.steps.length - 1 && !connected));
+  answers[el.name] = el.type === 'checkbox' ? (el.checked ? el.value : '') : el.value;
+  updateNext(!stepReady());
+  updateHint();
   persist();
 });
 
 $('#back').addEventListener('click', () => {
-  if (step > 0 && !busy && !state.pendingResponse) {
-    step--;
-    persist();
-    render(true);
-  }
+  if (busy || state.pendingResponse) return;
+  const prev = findVisibleStep(step, -1);
+  if (prev === step) return;
+  step = prev;
+  persist();
+  render(true);
 });
 
 function payload() {
+  syncBranchAnswers();
   return R.validate({ version: state.version, id: state.id, answers: { ...answers } });
 }
 
-function showSuccess() {
-  $('#survey').innerHTML = '<section class="success"><h1 tabindex="-1">Thank you.</h1><p>Your feedback is saved.</p><button id="next-person" type="button" class="send">Start for next person</button></section>';
+function showSuccess(preview = false) {
+  const note = preview
+    ? 'This was a preview. Answers were not saved.'
+    : 'Your feedback is saved.';
+  $('#survey').innerHTML = `<section class="success"><h1 tabindex="-1">Thank you.</h1><p>${note}</p><button id="next-person" type="button" class="send">Start for next person</button></section>`;
   $('#next-person').addEventListener('click', () => {
     try { sessionStorage.removeItem(storageKey); } catch {}
     location.reload();
   });
-  $('.progress').hidden = true;
-  $('#step-label').hidden = true;
+  const progressRow = $('.progress-row');
+  if (progressRow) progressRow.hidden = true;
   $('#survey h1').focus();
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -197,15 +242,26 @@ function showSuccess() {
 $('#survey').addEventListener('submit', async event => {
   event.preventDefault();
   if (busy || !stepReady()) return;
-  if (step < C.steps.length - 1) {
+  if (!isFinalVisibleStep()) {
     if (state.pendingResponse) return;
-    step++;
+    syncBranchAnswers();
+    step = findVisibleStep(step, 1);
     persist();
     render(true);
     return;
   }
   if (!connected) {
-    showError('The response connection is unavailable. Add a collector endpoint in config.js (see SETUP.md), or browse locally to review the questions.');
+    try {
+      payload();
+    } catch {
+      showError('Please complete the required questions.');
+      return;
+    }
+    state.submitted = true;
+    state.answers = blankAnswers();
+    delete state.pendingResponse;
+    persist();
+    showSuccess(true);
     return;
   }
   let data;
@@ -228,7 +284,7 @@ $('#survey').addEventListener('submit', async event => {
     state.answers = blankAnswers();
     delete state.pendingResponse;
     persist();
-    showSuccess();
+    showSuccess(false);
   } catch {
     showError('Could not confirm your response. Your answers are kept here. Please retry; it won’t send a duplicate.');
     updateNext(false, 'Try sending again');

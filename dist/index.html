@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Help us understand how you make UPI QR payments on iMobile and feedback on Scan & Pay concepts.">
+  <meta name="theme-color" content="#e85c1a">
+  <meta name="description" content="A short survey on how you pay with UPI on iMobile.">
   <meta property="og:title" content="UPI Scan & Pay feedback · iMobile">
-  <meta property="og:description" content="A short survey on iMobile UPI Scan & Pay behaviour and concepts.">
+  <meta property="og:description" content="A short survey on how you pay with UPI on iMobile.">
   <meta property="og:type" content="website">
   <title>UPI Scan & Pay feedback · iMobile</title>
   <link rel="stylesheet" href="base.css">
@@ -17,13 +17,31 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+  <header class="survey-header">
+    <picture>
+      <source
+        media="(max-width: 600px)"
+        srcset="assets/survey-header-mobile.png"
+        width="720"
+        height="104">
+      <img
+        class="survey-header-banner"
+        src="assets/survey-header.png"
+        alt="ICICI Bank — UPI Scan &amp; Pay feedback"
+        width="1024"
+        height="44"
+        decoding="async">
+    </picture>
+  </header>
   <main id="main">
-    <div class="topline"><span>UPI Scan &amp; Pay feedback <span class="squad">· iMobile</span></span><span id="step-label" aria-label="Survey progress">1 / 8</span></div>
-    <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+    <div class="progress-row">
+      <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+      <span id="step-label" aria-label="Survey progress">1 / 8</span>
+    </div>
     <form id="survey" novalidate>
       <div id="screen"><p>Loading survey…</p></div>
       <p id="form-error" class="error" role="alert" hidden></p>
-      <div class="action-dock"><div class="action-inner"><button id="back" type="button" class="back" hidden>← Back</button><button id="next" type="submit" class="send" disabled>Next</button></div></div>
+      <div class="action-dock"><p id="next-hint" class="next-hint" hidden>Choose an answer to continue.</p><div class="action-inner"><button id="back" type="button" class="back" hidden>← Back</button><button id="next" type="submit" class="send" disabled>Next</button></div></div>
     </form>
     <noscript><p>Please enable JavaScript to complete the survey.</p></noscript>
   </main>

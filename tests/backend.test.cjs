@@ -53,7 +53,7 @@ function fixture() {
     }
   });
   vm.runInContext(fs.readFileSync(path.join(root, 'backend/Code.gs'), 'utf8'), ctx);
-  return { ctx, p: response(), rows, getWrites: () => writes, isLocked: () => locked };
+  return { ctx, p: response({ upi_app: 'imobile', scan_method: 'widget' }), rows, getWrites: () => writes, isLocked: () => locked };
 }
 
 function post(f, origin = 'https://paneerpakoda.github.io') {
@@ -91,9 +91,13 @@ test('changing an already saved response fails rather than overwriting it', () =
 
 test('formula-like comments are stored as literal text', () => {
   const f = fixture();
-  f.p.answers.concept_1_feedback = ' =IMPORTXML("https://example.com")';
+  f.p.answers.upi_app = 'other';
+  f.p.answers.upi_app_other = ' =IMPORTXML("https://example.com")';
+  f.p.answers.opens_imobile = 'no';
+  f.p.answers.nonuser_reason = 'habit';
+  f.p.answers.scan_method = '';
   f.ctx.saveResponse(f.p);
-  const col = f.rows[0].indexOf('concept_1_feedback');
+  const col = f.rows[0].indexOf('upi_app_other');
   assert.equal(f.rows[1][col][0], "'");
 });
 
