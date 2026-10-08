@@ -1,14 +1,28 @@
 @font-face{font-family:Mulish;src:url('assets/mulish-regular.ttf')}
 @font-face{font-family:Mulish;src:url('assets/mulish-semibold.ttf');font-weight:600}
 @font-face{font-family:Mulish;src:url('assets/mulish-bold.ttf');font-weight:700}
-:root{color-scheme:only light;font-family:Mulish,system-ui,sans-serif;font-synthesis:none;color:#222428;background:#fff;--muted:#676b70;--line:#e1e3e6;--selected:#24262a}html{scroll-padding-bottom:180px}
-*{box-sizing:border-box}body{margin:0}button,textarea,input{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{cursor:default}button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #4276bd;outline-offset:4px}[hidden]{display:none!important}
-.survey-header{width:100%;margin:0;padding:0;line-height:0;background:linear-gradient(90deg,#f5821f 0%,#c5281c 100%)}
-.survey-header-banner{display:block;width:100%;height:auto;max-height:72px;object-fit:cover;object-position:center}
-@media(max-width:600px){
-  .survey-header-banner{max-height:none;object-fit:contain;object-position:center}
+:root{
+  color-scheme:only light;
+  font-family:Mulish,system-ui,sans-serif;
+  font-synthesis:none;
+  color:#222428;
+  background:#fff;
+  --muted:#676b70;
+  --line:#e1e3e6;
+  --selected:#24262a;
+  --page-gutter:24px;
+  --dock-space:48px;
 }
-main{max-width:800px;margin:24px auto 160px;padding:0 24px}
+html{scroll-padding-bottom:var(--dock-space)}
+html.dock-sticky{--dock-space:160px;scroll-padding-bottom:180px}
+*{box-sizing:border-box}body{margin:0}button,textarea,input{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{cursor:default}button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #4276bd;outline-offset:4px}[hidden]{display:none!important}
+
+.survey-header{width:100%;margin:0;background:linear-gradient(180deg,#EF7F1A 0%,#BE2A2A 100%);color:#fff}
+.survey-header-inner{max-width:800px;margin:0 auto;padding:12px var(--page-gutter);min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.survey-header-logo{display:block;height:30px;width:auto;flex:0 0 auto}
+.survey-header-title{margin:0;font-size:14px;font-weight:500;line-height:1.3;text-align:right;opacity:.95}
+
+main{max-width:800px;margin:24px auto var(--dock-space);padding:0 var(--page-gutter)}
 .progress-row{display:flex;align-items:center;gap:16px;margin:0 0 32px}
 .progress{flex:1;height:2px;background:#eef0f2;margin:0}.progress>div{height:100%;background:var(--selected);width:12.5%}
 #step-label{flex:0 0 auto;color:var(--muted);font-size:12px;line-height:1.5;white-space:nowrap}
@@ -36,11 +50,24 @@ h1{font-size:28px;font-weight:600;line-height:1.35;letter-spacing:-.6px;margin:0
 .prompt-figure img{width:min(100%,220px);height:auto;border-radius:16px;border:1px solid var(--line);background:#fff;box-shadow:0 8px 24px rgba(32,33,36,.08)}
 .concept-prompt{margin-top:0}
 .concept-figure{margin:0 0 8px;display:flex;flex-direction:column;align-items:center;width:100%}
-.concept-figure img{display:block;width:100%;max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.05);scroll-margin-bottom:160px}
+/* Web: keep the full mockup visible in the viewport without scrolling the image. */
+.concept-figure img{
+  display:block;
+  width:auto;
+  max-width:min(100%,280px);
+  max-height:min(46vh,calc(100vh - 360px));
+  height:auto;
+  object-fit:contain;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+  scroll-margin-bottom:var(--dock-space);
+}
 .concept-figure figcaption{margin:12px 0 0;text-align:center;font-size:16px;font-weight:700;line-height:1.4}
-.concept-tooltip{position:relative;margin-top:12px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(32,33,36,.12);text-align:center;font-size:14px;line-height:1.45}
+.concept-tooltip{position:relative;margin-top:12px;width:100%;max-width:min(100%,360px);padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(32,33,36,.12);text-align:center;font-size:14px;line-height:1.45}
 .concept-tooltip::before{content:"";position:absolute;top:-6px;left:50%;width:12px;height:12px;background:#fff;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
-.next-hint{max-width:800px;margin:0 auto;padding:10px 24px 0;color:var(--muted);font-size:13px;line-height:1.4;text-align:center}
+.next-hint{margin:0 0 8px;padding:0;color:var(--muted);font-size:13px;line-height:1.4;text-align:left}
 .subquestion,.choice-option,.comment-field{scroll-margin-bottom:140px}
 
 .comment-field{margin-top:20px}.comment-field label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
@@ -52,8 +79,47 @@ textarea{width:100%;min-height:88px;padding:12px;border:1px solid #d6d8da;border
 .intro-card-desc{font-size:14px;line-height:1.55;color:#42464c;margin:0 0 12px}
 .intro-card-footer{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0;border-top:1px solid var(--line);padding-top:12px}
 
-.action-dock{position:fixed;z-index:20;inset:auto 0 0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 18px #20212412;padding-bottom:env(safe-area-inset-bottom)}
-.action-inner{max-width:800px;margin:auto;padding:12px 24px;min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+/* Web default: actions sit directly under the options. */
+.action-dock{
+  position:static;
+  z-index:20;
+  margin-top:28px;
+  background:transparent;
+  border-top:0;
+  box-shadow:none;
+  padding-bottom:0;
+}
+.action-inner{
+  max-width:none;
+  margin:0;
+  padding:0;
+  min-height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+html.dock-sticky .action-dock{
+  position:fixed;
+  inset:auto 0 0;
+  margin-top:0;
+  background:#fff;
+  border-top:1px solid var(--line);
+  box-shadow:0 -4px 18px #20212412;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+html.dock-sticky .action-inner{
+  max-width:800px;
+  margin:auto;
+  padding:12px var(--page-gutter);
+  min-height:72px;
+}
+html.dock-sticky .next-hint{
+  max-width:800px;
+  margin:0 auto;
+  padding:10px var(--page-gutter) 0;
+  text-align:center;
+}
 .back{border:0;background:transparent;color:var(--muted);font-size:14px;padding:12px 0;min-height:48px}.back:disabled{opacity:.4}
 .send{margin-left:auto;background:#25272a;color:white;border:0;border-radius:8px;min-height:48px;padding:12px 24px;font-size:14px;font-weight:600}
 .send:disabled{opacity:.35}.send:not(:disabled){background:#b83a00;box-shadow:0 2px 0 #862900}.send:not(:disabled):hover{background:#9f3200}
@@ -65,21 +131,44 @@ textarea{width:100%;min-height:88px;padding:12px;border:1px solid #d6d8da;border
   .back:hover{color:#202124}
 }
 @media(max-width:600px){
-  main{padding:0 20px;margin:16px auto 180px}
+  :root{--page-gutter:20px;--dock-space:180px}
+  html{scroll-padding-bottom:180px}
+  .survey-header-inner{padding:10px var(--page-gutter);min-height:48px;gap:12px}
+  .survey-header-logo{height:26px}
+  .survey-header-title{font-size:12px;max-width:42%}
+  main{margin:16px auto var(--dock-space)}
   .progress-row{margin-bottom:16px}
   h1{font-size:23px;letter-spacing:-.4px}
   .instruction{margin-bottom:12px}
   .concept-figure{margin:0 0 12px}
-  /* Fit the whole phone mockup above the fixed dock (svh = mobile browser chrome expanded). */
+  .concept-tooltip{max-width:none}
+  /* Mobile: larger mockups so UI details stay readable. */
   .concept-figure img{
-    width:auto;
-    max-width:min(100%, 320px);
-    max-height:min(52svh, calc(100svh - 280px));
-    height:auto;
-    object-fit:contain;
+    max-width:min(100%,360px);
+    max-height:min(58svh,calc(100svh - 260px));
   }
-  .action-inner{padding:12px 20px}
-  .next-hint{padding:8px 20px 0}
+  /* Mobile keeps a sticky bottom dock for thumb reach. */
+  .action-dock{
+    position:fixed;
+    inset:auto 0 0;
+    margin-top:0;
+    background:#fff;
+    border-top:1px solid var(--line);
+    box-shadow:0 -4px 18px #20212412;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .action-inner{
+    max-width:800px;
+    margin:auto;
+    padding:12px var(--page-gutter);
+    min-height:72px;
+  }
+  .next-hint{
+    max-width:800px;
+    margin:0 auto;
+    padding:8px var(--page-gutter) 0;
+    text-align:center;
+  }
 }
 @media(prefers-reduced-motion:no-preference){
   .progress>div{transition:width .15s ease}

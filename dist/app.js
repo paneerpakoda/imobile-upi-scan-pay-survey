@@ -164,6 +164,9 @@ function render(focus = false) {
     $('#screen h1').focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
+  watchStepMedia();
+  syncDockMode();
+  scheduleDockSync();
 }
 
 function updateHint() {
@@ -171,6 +174,54 @@ function updateHint() {
   if (!hint) return;
   hint.textContent = 'Choose an answer to continue.';
   hint.hidden = stepReady();
+}
+
+const mobileDockMq = window.matchMedia('(max-width: 600px)');
+let dockSyncTimer = 0;
+let ignoreDockRo = false;
+
+function syncDockMode() {
+  const root = document.documentElement;
+  // Mobile always uses the sticky dock via CSS; keep the class off.
+  if (mobileDockMq.matches) {
+    root.classList.remove('dock-sticky');
+    return;
+  }
+  const wasSticky = root.classList.contains('dock-sticky');
+  // Probe with inline dock; suppress ResizeObserver while class toggles.
+  ignoreDockRo = true;
+  if (wasSticky) root.classList.remove('dock-sticky');
+  void document.body.offsetHeight;
+  const docH = Math.max(
+    root.scrollHeight,
+    root.offsetHeight,
+    document.body.scrollHeight,
+    document.body.offsetHeight
+  );
+  const needsSticky = docH > window.innerHeight + 2;
+  if (needsSticky) root.classList.add('dock-sticky');
+  else root.classList.remove('dock-sticky');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { ignoreDockRo = false; });
+  });
+}
+
+function scheduleDockSync() {
+  clearTimeout(dockSyncTimer);
+  dockSyncTimer = setTimeout(() => {
+    syncDockMode();
+    // Second pass after late image/font layout.
+    clearTimeout(dockSyncTimer);
+    dockSyncTimer = setTimeout(syncDockMode, 120);
+  }, 16);
+}
+
+function watchStepMedia() {
+  document.querySelectorAll('#screen img').forEach(img => {
+    if (img.complete) return;
+    img.addEventListener('load', scheduleDockSync, { once: true });
+    img.addEventListener('error', scheduleDockSync, { once: true });
+  });
 }
 
 function isFinalVisibleStep() {
@@ -198,6 +249,7 @@ $('#survey').addEventListener('click', event => {
   updateHint();
   $('#form-error').hidden = true;
   persist();
+  scheduleDockSync();
 });
 
 $('#survey').addEventListener('input', event => {
@@ -208,7 +260,24 @@ $('#survey').addEventListener('input', event => {
   updateNext(!stepReady());
   updateHint();
   persist();
+  scheduleDockSync();
 });
+
+window.addEventListener('resize', scheduleDockSync);
+if (typeof mobileDockMq.addEventListener === 'function') {
+  mobileDockMq.addEventListener('change', scheduleDockSync);
+} else if (typeof mobileDockMq.addListener === 'function') {
+  mobileDockMq.addListener(scheduleDockSync);
+}
+if (typeof ResizeObserver === 'function') {
+  const screenEl = $('#screen');
+  if (screenEl) {
+    const dockResizeObserver = new ResizeObserver(() => {
+      if (!ignoreDockRo) scheduleDockSync();
+    });
+    dockResizeObserver.observe(screenEl);
+  }
+}
 
 $('#back').addEventListener('click', () => {
   if (busy || state.pendingResponse) return;
