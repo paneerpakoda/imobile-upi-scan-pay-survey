@@ -41,10 +41,13 @@ npm test
 
 ## Setup / publish
 
-1. Create the private Sheet + deploy Apps Script (**SETUP.md** steps 1–2).
-2. Put the `/exec` URL in `dist/config.js`.
-3. Push `main` to GitHub; Pages workflow publishes `dist/`. Enable **Settings → Pages → GitHub Actions** on the new repo if prompted.
-4. Complete one test response, confirm the Sheet row, then remove it before inviting participants.
+Connect the response collector (private Sheet + Apps Script):
+
+```bash
+./scripts/setup-collector.sh
+```
+
+Or follow **SETUP.md** by hand. Then: push `main` if the wizard did not; Pages publishes `dist/`. Complete one test response, confirm the Sheet row, then remove it before inviting participants.
 
 Do not publish Sheet contents or credentials.
 
