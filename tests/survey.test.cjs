@@ -103,6 +103,22 @@ test('why another app accepts multiple reasons in option order', () => {
   })));
 });
 
+test('what gets in the way accepts several answers and keeps Nothing exclusive', () => {
+  const base = noticeRatings({
+    upi_app: 'imobile',
+    scan_method: 'login_screen',
+    found_scan: 'noticed',
+    knew_widget: 'no'
+  });
+  assert.equal(rules.stepComplete('almost_stopped', { ...base, almost_stopped: 'slow_launch,failed' }), true);
+  assert.equal(rules.validate(response({ ...base, almost_stopped: 'slow_launch,failed' })).answers.almost_stopped, 'slow_launch,failed');
+  assert.doesNotThrow(() => rules.validate(response({ ...base, almost_stopped: 'nothing' })));
+  assert.throws(() => rules.validate(response({ ...base, almost_stopped: 'slow_launch,nothing' })));
+  assert.equal(rules.toggleMulti('almost_stopped', 'slow_launch,safety', 'nothing'), 'nothing');
+  assert.equal(rules.toggleMulti('almost_stopped', 'nothing', 'failed'), 'failed');
+  assert.equal(rules.toggleMulti('almost_stopped', 'slow_launch', 'safety'), 'slow_launch,safety');
+});
+
 test('someone who opens iMobile but usually pays elsewhere still says why, then how they scan', () => {
   const answers = { upi_app: 'paytm', opens_imobile: 'yes', nonuser_reason: 'rewards' };
   assert.equal(rules.stepVisible('nonuser_reason', answers), true);

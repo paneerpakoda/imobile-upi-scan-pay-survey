@@ -208,7 +208,7 @@ pause "Sheet created and named? Press Enter."
 
 # ── 2. Paste Code.gs ──────────────────────────────────────────────────────
 stage "Paste the collector into Apps Script"
-say "The collector is backend/Code.gs (schema v10). We will copy it for you."
+say "The collector is backend/Code.gs (schema v11). We will copy it for you."
 if [[ -f "$CODE_GS" ]]; then
   if command -v pbcopy >/dev/null 2>&1; then
     pbcopy < "$CODE_GS"
@@ -244,7 +244,7 @@ stage "Deploy the web app"
 say "This publishes the /exec URL the survey page posts to."
 step "Deploy → New deployment"
 step "Select type: Web app (gear → Web app if asked)"
-step "Description: v10 collector (or similar)"
+step "Description: v11 collector (or similar)"
 step "Execute as: Me"
 step "Who has access: Anyone"
 step "Click Deploy"

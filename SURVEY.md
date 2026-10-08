@@ -1,6 +1,6 @@
-# iMobile UPI Scan & Pay — questionnaire (v10)
+# iMobile UPI Scan & Pay — questionnaire (v11)
 
-Schema version: `imobile-upi-scan-pay-2026-10-v10`.
+Schema version: `imobile-upi-scan-pay-2026-10-v11`.
 
 The survey asks how people pay with UPI today, why another app wins when it does, and how people who open iMobile scan a QR. Everyone ends on two concept screens, then submits.
 
@@ -43,7 +43,7 @@ Technical branching code: `dist/rules.js`. Question wording: `dist/questions.js`
 | 4 | Why another app | Usual app is not iMobile (after they answer Opens iMobile?) | Why do you pay in another app instead of iMobile? (select all that apply) |
 | 5 | How they scan | Usual app is iMobile, **or** they open iMobile | When you pay a QR from iMobile, what do you usually do? |
 | 6 | How they found Scan any QR | They already scan on the login screen | How did you find Scan any QR on the login screen, before the PIN? |
-| 7 | What gets in the way | They already scan on the login screen | When you use Scan any QR… what gets in the way? |
+| 7 | What gets in the way | They already scan on the login screen | When you use Scan any QR… what gets in the way? (select all that apply) |
 | 8 | Knew about Scan any QR? | They log in then scan, or don’t scan QR in iMobile | Did you know about Scan any QR on the login screen, before the PIN? |
 | 9 | Why they don’t use it | They knew about Scan any QR but don’t use it | What’s the main reason you don’t use Scan any QR…? |
 | 10 | Knew about the widget? | They open iMobile and do **not** already use the widget | Did you know iMobile has a home-screen widget that opens Scan any QR? |
@@ -178,7 +178,7 @@ flowchart TD
 - **Why another app (multi-select):** Separate bank app · Have to log in · Trust · Bad experience · Rewards · UPI ID already set up · Habit · Other  
 - **How they scan:** Scan any QR on the login screen, before the PIN · Log in, then scan · The home-screen widget · I open iMobile, but I don’t scan QR there  
 - **How they found it:** Noticed myself · Someone showed me · Message from the bank · Don’t remember · Other  
-- **What gets in the way:** Slow to open · Safety · Confirmation · Failed or stuck · Nothing  
+- **What gets in the way (multi-select):** Slow to open · Safety · Confirmation · Failed or stuck · Nothing (picking Nothing clears the others)  
 - **Knew about Scan any QR? / Knew about the widget?:** Yes · No · Not sure  
 - **Why they don’t use it:** Want to see balance first · Don’t trust payment before login · Tried it and it failed · Logging in does not bother me · Other  
 - **Easier to notice?:** Clearer · About the same · More confusing  

@@ -170,7 +170,9 @@ window.SURVEY_CONTENT = Object.freeze({
       kind: 'choice',
       field: 'almost_stopped',
       required: true,
+      multi: true,
       question: 'When you use Scan any QR on the login screen, before the PIN, what gets in the way?',
+      instruction: 'Select all that apply.',
       optionsKey: 'almost_stopped'
     }),
     Object.freeze({
