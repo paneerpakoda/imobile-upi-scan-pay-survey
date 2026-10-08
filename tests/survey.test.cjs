@@ -73,6 +73,36 @@ test('people who do not open iMobile get the reason path and an open-the-app con
   assert.equal(rules.stepVisible('nonuser_reason', { upi_app: 'google_pay', opens_imobile: 'no' }), true);
 });
 
+test('why another app accepts multiple reasons in option order', () => {
+  const answers = {
+    upi_app: 'phonepe',
+    opens_imobile: 'rarely',
+    nonuser_reason: 'login,rewards,habit'
+  };
+  assert.equal(rules.stepComplete('nonuser_reason', answers), true);
+  assert.equal(rules.validate(response(answers)).answers.nonuser_reason, 'login,rewards,habit');
+  assert.equal(rules.toggleMulti('nonuser_reason', 'login,rewards', 'habit'), 'login,rewards,habit');
+  assert.equal(rules.toggleMulti('nonuser_reason', 'login,rewards', 'login'), 'rewards');
+  assert.equal(rules.hasChoice('login,other', 'other'), true);
+  assert.throws(() => rules.validate(response({
+    upi_app: 'phonepe',
+    opens_imobile: 'rarely',
+    nonuser_reason: 'other',
+    nonuser_reason_other: ''
+  })));
+  assert.doesNotThrow(() => rules.validate(response({
+    upi_app: 'phonepe',
+    opens_imobile: 'rarely',
+    nonuser_reason: 'login,other',
+    nonuser_reason_other: 'Cashback club'
+  })));
+  assert.throws(() => rules.validate(response({
+    upi_app: 'phonepe',
+    opens_imobile: 'rarely',
+    nonuser_reason: 'login,not_a_reason'
+  })));
+});
+
 test('someone who opens iMobile but usually pays elsewhere still says why, then how they scan', () => {
   const answers = { upi_app: 'paytm', opens_imobile: 'yes', nonuser_reason: 'rewards' };
   assert.equal(rules.stepVisible('nonuser_reason', answers), true);
@@ -203,6 +233,11 @@ test('knowledge questions do not include a screenshot, and age is gone', () => {
   assert.doesNotMatch(app, /mainly offering/);
   assert.doesNotMatch(app, /class="required"/);
   assert.match(app, /Choose an answer to continue/);
+  assert.match(app, /Choose at least one answer to continue/);
+  assert.match(questions, /Select all that apply/);
+  assert.match(questions, /multi: true/);
+  assert.match(questions, /Why do you pay in another app instead of iMobile/);
+  assert.doesNotMatch(questions, /What’s the main reason you pay in another app/);
   assert.match(app, /Finish preview/);
   assert.match(app, /Answers were not saved/);
   assert.match(app, /maxVisibleCount/);

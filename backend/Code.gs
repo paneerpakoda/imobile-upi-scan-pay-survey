@@ -1,7 +1,7 @@
 /* Shared by the browser and backend/Code.gs. */
 var SurveyRules = (function () {
   'use strict';
-  const version = 'imobile-upi-scan-pay-2026-10-v9';
+  const version = 'imobile-upi-scan-pay-2026-10-v10';
   const upiApps = ['imobile', 'google_pay', 'phonepe', 'paytm', 'whatsapp', 'cred', 'amazon_pay', 'super_money', 'bhim', 'other'];
   const opensImobileOptions = ['yes', 'rarely', 'no'];
   const nonuserReasons = ['separate_app', 'login', 'trust', 'bad_experience', 'rewards', 'upi_id', 'habit', 'other'];
@@ -13,6 +13,7 @@ var SurveyRules = (function () {
   const noticeScale = ['clearer', 'same', 'more_confusing'];
   const persuadeReasons = ['balance', 'trust', 'failed', 'no_harder', 'other'];
   const stepIds = ['intro', 'upi_app', 'opens_imobile', 'nonuser_reason', 'scan_method', 'found_scan', 'almost_stopped', 'knew_scan', 'persuade_reason', 'knew_widget', 'concept_1', 'concept_2'];
+  const multiFields = new Set(['nonuser_reason']);
   const fields = {
     upi_app: upiApps,
     upi_app_other: 200,
@@ -33,6 +34,36 @@ var SurveyRules = (function () {
     concept_2_feedback: 1500
   };
   const optionalText = new Set(['upi_app_other', 'nonuser_reason_other', 'found_scan_other', 'persuade_reason_other', 'concept_1_feedback', 'concept_2_feedback']);
+
+  function parseMulti(value) {
+    if (!value) return [];
+    return String(value).split(',').filter(Boolean);
+  }
+
+  function encodeMulti(allowed, selected) {
+    const set = new Set(selected);
+    return allowed.filter(v => set.has(v)).join(',');
+  }
+
+  function toggleMulti(key, current, value) {
+    const allowed = fields[key];
+    if (!Array.isArray(allowed) || !allowed.includes(value)) return current || '';
+    const set = new Set(parseMulti(current));
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+    return encodeMulti(allowed, set);
+  }
+
+  function hasChoice(value, token) {
+    return parseMulti(value).includes(token);
+  }
+
+  function validMulti(value, allowed) {
+    const parts = parseMulti(value);
+    if (parts.length === 0) return false;
+    if (new Set(parts).size !== parts.length) return false;
+    return parts.every(part => allowed.includes(part));
+  }
 
   function opensImobile(answers) {
     return answers.upi_app === 'imobile' || answers.opens_imobile === 'yes';
@@ -104,7 +135,7 @@ var SurveyRules = (function () {
     }
     if (!stepVisible('knew_widget', answers)) blank('knew_widget');
     if (answers.upi_app !== 'other') blank('upi_app_other');
-    if (answers.nonuser_reason !== 'other') blank('nonuser_reason_other');
+    if (!hasChoice(answers.nonuser_reason, 'other')) blank('nonuser_reason_other');
     if (answers.found_scan !== 'other') blank('found_scan_other');
     if (answers.persuade_reason !== 'other') blank('persuade_reason_other');
     const scale = conceptScale(answers);
@@ -156,6 +187,7 @@ var SurveyRules = (function () {
       if (stepFor[key]) return !stepVisible(stepFor[key], answers);
       return false;
     }
+    if (multiFields.has(key)) return validMulti(value, rule);
     return rule.includes(value);
   }
 
@@ -165,13 +197,18 @@ var SurveyRules = (function () {
     } else if (a[key]) throw Error('Unexpected ' + (label || key) + ' for skipped step.');
   }
 
+  function choiceIncludesOther(choiceKey, a) {
+    return multiFields.has(choiceKey) ? hasChoice(a[choiceKey], 'other') : a[choiceKey] === 'other';
+  }
+
   function requireOther(a, choiceKey, textKey, when) {
     if (!when) {
       if (a[textKey]) throw Error('Unexpected ' + textKey + ' for skipped step.');
       return;
     }
-    if (a[choiceKey] === 'other' && !a[textKey].trim()) throw Error('Missing or invalid answer: ' + textKey);
-    if (a[choiceKey] !== 'other' && a[textKey]) throw Error('Unexpected other text for ' + choiceKey + '.');
+    const wantsOther = choiceIncludesOther(choiceKey, a);
+    if (wantsOther && !a[textKey].trim()) throw Error('Missing or invalid answer: ' + textKey);
+    if (!wantsOther && a[textKey]) throw Error('Unexpected other text for ' + choiceKey + '.');
   }
 
   function validate(p) {
@@ -212,8 +249,8 @@ var SurveyRules = (function () {
       case 'opens_imobile':
         return opensImobileOptions.includes(answers.opens_imobile);
       case 'nonuser_reason':
-        return nonuserReasons.includes(answers.nonuser_reason) &&
-          (answers.nonuser_reason !== 'other' || !!answers.nonuser_reason_other.trim());
+        return validMulti(answers.nonuser_reason, nonuserReasons) &&
+          (!hasChoice(answers.nonuser_reason, 'other') || !!answers.nonuser_reason_other.trim());
       case 'scan_method':
         return scanMethods.includes(answers.scan_method);
       case 'found_scan':
@@ -241,7 +278,8 @@ var SurveyRules = (function () {
   return {
     version, upiApps, opensImobileOptions, nonuserReasons, awareness, scanMethods,
     foundScan, almostStopped, persuadeReasons, likert, noticeScale,
-    stepIds, fields, optionalText,
+    stepIds, fields, optionalText, multiFields,
+    parseMulti, encodeMulti, toggleMulti, hasChoice, validMulti,
     opensImobile, nonUser, teachOrPersuade, conceptSegment, conceptScale,
     stepVisible, clearHiddenAnswers, maxVisibleCount,
     validAnswer, validate, stepComplete

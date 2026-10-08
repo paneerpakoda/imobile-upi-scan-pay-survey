@@ -1,6 +1,6 @@
-# iMobile UPI Scan & Pay — questionnaire (v9)
+# iMobile UPI Scan & Pay — questionnaire (v10)
 
-Schema version: `imobile-upi-scan-pay-2026-10-v9`.
+Schema version: `imobile-upi-scan-pay-2026-10-v10`.
 
 The survey asks how people pay with UPI today, why another app wins when it does, and how people who open iMobile scan a QR. Everyone ends on two concept screens, then submits.
 
@@ -40,7 +40,7 @@ Technical branching code: `dist/rules.js`. Question wording: `dist/questions.js`
 | 1 | Intro | Always | About the survey |
 | 2 | Usual UPI app | Always | What app do you usually use for UPI payments? |
 | 3 | Opens iMobile? | Usual app is **not** iMobile | In a typical month, do you open the iMobile app? |
-| 4 | Why another app | Usual app is not iMobile (after they answer Opens iMobile?) | What’s the main reason you pay in another app instead of iMobile? |
+| 4 | Why another app | Usual app is not iMobile (after they answer Opens iMobile?) | Why do you pay in another app instead of iMobile? (select all that apply) |
 | 5 | How they scan | Usual app is iMobile, **or** they open iMobile | When you pay a QR from iMobile, what do you usually do? |
 | 6 | How they found Scan any QR | They already scan on the login screen | How did you find Scan any QR on the login screen, before the PIN? |
 | 7 | What gets in the way | They already scan on the login screen | When you use Scan any QR… what gets in the way? |
@@ -175,7 +175,7 @@ flowchart TD
 
 - **Usual UPI app:** iMobile, Google Pay, PhonePe, Paytm, WhatsApp Pay, CRED, Amazon Pay, super.money, BHIM, Other  
 - **Opens iMobile?:** Yes, I open it · I have it, but I almost never open it · I don’t have it  
-- **Why another app:** Separate bank app · Have to log in · Trust · Bad experience · Rewards · UPI ID already set up · Habit · Other  
+- **Why another app (multi-select):** Separate bank app · Have to log in · Trust · Bad experience · Rewards · UPI ID already set up · Habit · Other  
 - **How they scan:** Scan any QR on the login screen, before the PIN · Log in, then scan · The home-screen widget · I open iMobile, but I don’t scan QR there  
 - **How they found it:** Noticed myself · Someone showed me · Message from the bank · Don’t remember · Other  
 - **What gets in the way:** Slow to open · Safety · Confirmation · Failed or stuck · Nothing  

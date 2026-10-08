@@ -75,15 +75,25 @@ function progressMeta() {
   return { current: index + 1, total: R.maxVisibleCount(answers) };
 }
 
+function choiceSelected(stepDef, value) {
+  if (stepDef.multi) return R.hasChoice(answers[stepDef.field], value);
+  return answers[stepDef.field] === value;
+}
+
 function choiceOptions(stepDef) {
   const labels = C.labels[stepDef.optionsKey];
   const keys = Object.keys(labels);
   const withLogos = stepDef.withLogos === true;
+  const multi = stepDef.multi === true;
   const figure = stepDef.image
     ? `<figure class="prompt-figure"><img src="${escape(stepDef.image)}" alt="${escape(stepDef.imageAlt || '')}" width="360" height="800"></figure>`
     : '';
-  return `${figure}<div class="choice-options" role="radiogroup" aria-label="${escape(stepDef.question)}">${keys.map(value => {
-    const selected = answers[stepDef.field] === value;
+  const instruction = stepDef.instruction
+    ? `<p class="instruction">${escape(stepDef.instruction)}</p>`
+    : '';
+  const groupRole = multi ? 'group' : 'radiogroup';
+  return `${figure}${instruction}<div class="choice-options" role="${groupRole}" aria-label="${escape(stepDef.question)}"${multi ? ' data-multi="true"' : ''}>${keys.map(value => {
+    const selected = choiceSelected(stepDef, value);
     const logo = withLogos ? C.upiAppLogos[value] : '';
     const mark = logo
       ? `<span class="choice-logo" aria-hidden="true"><img src="${escape(logo)}" alt="" width="28" height="28"></span>`
@@ -93,7 +103,9 @@ function choiceOptions(stepDef) {
 }
 
 function otherField(stepDef) {
-  const show = answers[stepDef.field] === 'other';
+  const show = stepDef.multi
+    ? R.hasChoice(answers[stepDef.field], 'other')
+    : answers[stepDef.field] === 'other';
   return `<div class="other-text" ${show ? '' : 'hidden'}><label for="${stepDef.otherField}">Please specify</label><input id="${stepDef.otherField}" name="${stepDef.otherField}" type="text" maxlength="200" value="${escape(answers[stepDef.otherField])}" placeholder="Your answer" autocomplete="off"></div>`;
 }
 
@@ -172,7 +184,10 @@ function render(focus = false) {
 function updateHint() {
   const hint = $('#next-hint');
   if (!hint) return;
-  hint.textContent = 'Choose an answer to continue.';
+  const multi = currentStep()?.multi === true;
+  hint.textContent = multi
+    ? 'Choose at least one answer to continue.'
+    : 'Choose an answer to continue.';
   hint.hidden = stepReady();
 }
 
@@ -234,17 +249,32 @@ $('#survey').addEventListener('click', event => {
   if (!button || button.disabled || busy || state.pendingResponse) return;
   const field = button.dataset.field;
   const value = button.dataset.choice;
-  if (!R.validAnswer(field, value, answers) && value !== '') return;
-  answers[field] = value;
+  const stepDef = currentStep();
+  const multi = stepDef.multi === true && stepDef.field === field;
+  if (multi) {
+    if (!R.fields[field]?.includes?.(value)) return;
+    answers[field] = R.toggleMulti(field, answers[field], value);
+  } else {
+    if (!R.validAnswer(field, value, answers) && value !== '') return;
+    answers[field] = value;
+  }
   if (field === 'upi_app' && value !== 'other') answers.upi_app_other = '';
-  if (field === 'nonuser_reason' && value !== 'other') answers.nonuser_reason_other = '';
+  if (field === 'nonuser_reason' && !R.hasChoice(answers.nonuser_reason, 'other')) answers.nonuser_reason_other = '';
   if (field === 'found_scan' && value !== 'other') answers.found_scan_other = '';
   if (field === 'persuade_reason' && value !== 'other') answers.persuade_reason_other = '';
   if (field === 'upi_app' || field === 'opens_imobile' || field === 'scan_method' || field === 'knew_scan') syncBranchAnswers();
-  document.querySelectorAll(`[data-field="${field}"][data-choice]`).forEach(b =>
-    b.setAttribute('aria-pressed', String(b.dataset.choice === answers[field])));
+  document.querySelectorAll(`[data-field="${field}"][data-choice]`).forEach(b => {
+    const pressed = multi
+      ? R.hasChoice(answers[field], b.dataset.choice)
+      : b.dataset.choice === answers[field];
+    b.setAttribute('aria-pressed', String(pressed));
+  });
   const otherWrap = $('.other-text');
-  if (otherWrap) otherWrap.hidden = answers[currentStep().field] !== 'other';
+  if (otherWrap) {
+    otherWrap.hidden = multi
+      ? !R.hasChoice(answers[stepDef.field], 'other')
+      : answers[stepDef.field] !== 'other';
+  }
   updateNext(!stepReady());
   updateHint();
   $('#form-error').hidden = true;

@@ -143,7 +143,9 @@ window.SURVEY_CONTENT = Object.freeze({
       field: 'nonuser_reason',
       otherField: 'nonuser_reason_other',
       required: true,
-      question: 'What’s the main reason you pay in another app instead of iMobile?',
+      multi: true,
+      question: 'Why do you pay in another app instead of iMobile?',
+      instruction: 'Select all that apply.',
       optionsKey: 'nonuser_reason'
     }),
     Object.freeze({
